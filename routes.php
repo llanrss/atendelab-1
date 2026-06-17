@@ -1,41 +1,75 @@
 <?php
 
-require_once __DIR__ . '/app/Controllers/UsuarioController.php';
+require_once __DIR__ . '/app/Controllers/AuthController.php';
+require_once __DIR__ . '/app/Controllers/UsuariosController.php';
+require_once __DIR__ . '/app/Middleware/auth.php';
 
-$controller = $_GET['controller'] ?? 'home';
-$action = $_GET['action'] ?? 'index';
+$controller = $_GET['controller'] ?? 'auth';
+$action = $_GET['action'] ?? 'login';
 
-if ($controller === 'usuarios') {
-    $usuariosController = new UsuariosController();
+switch ($controller) {
 
-    switch ($action) {
-        case 'listar':
-            $usuariosController->listar();
-            break;
+    case 'auth':
+        $authController = new AuthController();
 
-        case 'buscar':
-            $usuariosController->buscarPorId();
-            break;
+        switch ($action) {
 
-        case 'criar':
-            $usuariosController->criar();
-            break;
+            case 'login':
+                $authController->exibirLogin();
+                break;
 
-        case 'atualizar':
-            $usuariosController->atualizar();
-            break;
+            case 'entrar':
+                $authController->entrar();
+                break;
 
-        case 'excluir':
-            $usuariosController->excluir();
-            break;
+            case 'dashboard':
+                $authController->dashboard();
+                break;
 
-        default:
-            // Retorno padrão para action inválida.
-            echo 'Ação de usuários não encontrada.';
-            break;
-    }
+            case 'logout':
+                $authController->logout();
+                break;
 
-} else {
-    echo '<h1>AtendeLab</h1>';
-    echo '<p>Projeto em execução. Use ?controller=usuarios&action=listar para testar.</p>';
+            default:
+                http_response_code(404);
+                echo 'Acao de autenticacao nao encontrada.';
+        }
+        break;
+
+    case 'usuarios':
+        exigirAutenticacao();
+
+        $usuariosController = new UsuariosController();
+
+        switch ($action) {
+
+            case 'listar':
+                $usuariosController->listar();
+                break;
+
+            case 'buscarPorId':
+                $usuariosController->buscarPorId();
+                break;
+
+            case 'criar':
+                $usuariosController->criar();
+                break;
+
+            case 'atualizar':
+                $usuariosController->atualizar();
+                break;
+
+            case 'excluir':
+                $usuariosController->excluir();
+                break;
+
+            default:
+                http_response_code(404);
+                echo 'Acao de usuarios nao encontrada.';
+        }
+        break;
+
+    default:
+        http_response_code(404);
+        echo 'Controller nao encontrado.';
 }
